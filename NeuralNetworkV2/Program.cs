@@ -29,6 +29,11 @@ namespace NeuralNetworkV2
             int numOfTests;
             double[] output;
             List<double[]> input = new List<double[]>();
+            double[][] rightAnswers;
+            bool networkResult;
+            
+            WriteLine("_____Forward pass test_____");
+            WriteLine();
 
             Write("Enter number of tests: ");
             numOfTests = int.Parse(ReadLine());
@@ -54,7 +59,24 @@ namespace NeuralNetworkV2
 
                 WriteLine(); 
             }
-            
+
+            WriteLine();
+            WriteLine("______Training test______");
+            WriteLine();
+
+            WriteLine("Enter right answers: ");
+            rightAnswers = new double[numOfTests][];
+
+            for (i = 0; i < numOfTests; i++)
+            {
+                Write("For test {0}: ", i);
+                rightAnswers[i] = ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray();
+            }
+
+            networkResult = neuralNetwork.TrainUntilConvergence(input.ToArray(), rightAnswers);
+
+            WriteLine("Result: {0}", networkResult);
+
             ReadKey();
         }
         

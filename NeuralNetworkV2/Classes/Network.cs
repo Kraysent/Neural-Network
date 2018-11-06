@@ -77,6 +77,7 @@ namespace NeuralNetworkV2
         /// <returns></returns>
         public double TrainOnSingleExample(double[] example, double[] answer)
         {
+            WriteLine("I - {0}; Ex - {1}", NumberOfInputs, example.Length);
             if (example.Length != NumberOfInputs) throw new Exception("Example vector has not the same length as number of inputs to network");
             if (answer.Length != NumberOfOutputs) throw new Exception("Answers vector has not the same length as number of outputs from network");
 
@@ -86,7 +87,7 @@ namespace NeuralNetworkV2
             double[] inputVector = example;
             List<double[]> outputs = new List<double[]>();
 
-            for (i = 0; i < Neurons.Count; i++)
+            for (i = 0; i < NumberOfLayers; i++)
             {
                 outputs.Add(new double[Neurons[i].Length]);
 
