@@ -17,39 +17,53 @@ namespace NeuralNetworkV2
         {
             //-----------------Creating network-----------------//
 
-            int numberOfParameters = 2, i;
+            int numberOfParameters = 2, i, j;
             double learningRate = 0.1;
             Network neuralNetwork = new Network(numberOfParameters, learningRate);
 
             neuralNetwork.AddLayer(2, Sigma, SigmaDerivative);
             neuralNetwork.AddLayer(1, Sigma, SigmaDerivative);
 
-            //-----------------Creating network-----------------//
-
             //-----------------Testing-----------------------//
 
-            double[] input, output;
+            int numOfTests;
+            double[] output;
+            List<double[]> input = new List<double[]>();
 
-            Write("Enter {0} numbers: ", numberOfParameters);
-            input = AddingOne(ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray());
-            output = neuralNetwork.ForwardPass(input.ToArray());
+            Write("Enter number of tests: ");
+            numOfTests = int.Parse(ReadLine());
+            WriteLine();
+            WriteLine("Enter {0} tests with {1} parametres in each: ", numOfTests, numberOfParameters);
 
-            Write("Network answer: ");
-
-            for (i = 0; i < output.Length; i++)
+            for (i = 0; i < numOfTests; i++)
             {
-                Write("{0} ", output[i]);
+                Write("Test {0}: ", i);
+                input.Add(ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray());
+                input[i] = AddingOne(input[i]);
             }
 
-            //-----------------Testing-----------------------//
+            WriteLine();
+            WriteLine("Network answers: ");
 
+            for (i = 0; i < numOfTests; i++)
+            {
+                output = neuralNetwork.ForwardPass(input[i]);
+                Write("For test {0}: ", i);
+
+                for (j = 0; j < output.Length; j++) Write("{0} ", output[j]);
+
+                WriteLine(); 
+            }
+            
             ReadKey();
         }
-
-        public static double[] AddingOne(double[] input)
+        
+        private static double[] AddingOne(double[] input)
         {
-            var arr = input.ToList();
+            List<double> arr = input.ToList();
+
             arr.Insert(0, 1);
+
             return arr.ToArray();
         }
     }

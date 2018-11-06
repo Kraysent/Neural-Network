@@ -1,4 +1,6 @@
 ﻿using System;
+using static System.Math;
+using static System.Console;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,16 +13,17 @@ namespace NeuralNetworkV2
         public double LearningRate;
 
         public int NumberOfLayers { get => Neurons.Count; }
-        public int NumberInOutputLayer { get => Neurons[NumberOfLayers - 1].Length; }
+        public int NumberOfOutputs { get => Neurons[NumberOfLayers - 1].Length; }
 
         /// <summary>
         /// Initialises empty neural network
         /// </summary>
         /// <param name="numberOfInputs"></param>
-        public Network(int numberOfInputs, double learningRate)
+        public Network(int numberOfInputs, double learningRate = 0.1)
         {
             Neurons = new List<Neuron[]>();
             NumberOfInputs = numberOfInputs;
+            LearningRate = learningRate;
         }
 
         /// <summary>
@@ -51,7 +54,7 @@ namespace NeuralNetworkV2
             int i, j;
             double[] outputVector = new double[inputs.Length];
 
-            for (i = 0; i < Neurons.Count; i++)
+            for (i = 0; i < NumberOfLayers; i++)
             {
                 outputVector = new double[Neurons[i].Length];
 
@@ -66,8 +69,17 @@ namespace NeuralNetworkV2
             return outputVector;
         }
 
-        public void TrainOnSingleExample(double[] example, double[] answer)
+        /// <summary>
+        /// Changes weight of each neuron and returns post-error for single example
+        /// </summary>
+        /// <param name="example"></param>
+        /// <param name="answer"></param>
+        /// <returns></returns>
+        public double TrainOnSingleExample(double[] example, double[] answer)
         {
+            if (example.Length != NumberOfInputs) throw new Exception("Example vector has not the same length as number of inputs to network");
+            if (answer.Length != NumberOfOutputs) throw new Exception("Answers vector has not the same length as number of outputs from network");
+
             //-------Forward pass with saved answers for each neuron-------//
 
             int i, j;
@@ -88,7 +100,7 @@ namespace NeuralNetworkV2
 
             //-------Training-------//
 
-            double[][] delta = new double[NumberInOutputLayer][];
+            double[][] delta = new double[NumberOfOutputs][];
             int k;
 
             for (i = NumberOfLayers - 1; i >= 0; i--)
@@ -114,7 +126,45 @@ namespace NeuralNetworkV2
 
             //-------Counting error-------//
 
+            double error = 0;
+            double[] newAnswer = ForwardPass(example);
 
+            for (i = 0; i < newAnswer.Length; i++)
+            {
+                error += Pow(newAnswer[i] - answer[i], 2);
+            }
+
+            return error;
+        }
+
+        /// <summary>
+        /// Trains network on input matrix of data. Returns true, if network converged, false if not
+        /// </summary>
+        /// <param name="inputMatrix"></param>
+        /// <param name="rightAnswers"></param>
+        /// <param name="maxEpoches"></param>
+        /// <param name="eps"></param>
+        /// <returns></returns>
+        public bool TrainUntilConvergence(double[][] inputMatrix, double[][] rightAnswers, int maxEpoches = (int)1e3, double eps = 1e-3)
+        {
+            if (inputMatrix.Length != rightAnswers.Length) throw new Exception("Number of example tests is not equal to number of right answers tests");
+
+            int i, j;
+            double prevErr = 0, currError = 0;
+
+            for (i = 0; i < maxEpoches; i++)
+            {
+                for (j = 0; j < inputMatrix.Length; j++)
+                {
+                    currError = TrainOnSingleExample(inputMatrix[i], rightAnswers[i]);
+                }
+
+                if (Abs(currError - prevErr) < eps) return true;
+
+                prevErr = currError;
+            }
+
+            return false;
         }
 
         /// <summary>

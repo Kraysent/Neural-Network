@@ -1,4 +1,5 @@
 ﻿using System;
+using static System.Console;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,7 +46,7 @@ namespace NeuralNetworkV2
         {
             int i;
             double summ = 0;
-
+            
             if (inputs.Length != InputWeights.Length) throw new Exception("Length of input vector is not equal to length of weight vector.");
 
             for (i = 0; i < InputWeights.Length; i++)
