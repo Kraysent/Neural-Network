@@ -44,7 +44,6 @@ namespace NeuralNetworkV2
             {
                 Write("Test {0}: ", i);
                 input.Add(ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray());
-                input[i] = AddingOne(input[i]);
             }
 
             WriteLine();
@@ -72,10 +71,22 @@ namespace NeuralNetworkV2
                 Write("For test {0}: ", i);
                 rightAnswers[i] = ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray();
             }
-
+            
             networkResult = neuralNetwork.TrainUntilConvergence(input.ToArray(), rightAnswers);
 
             WriteLine("Result: {0}", networkResult);
+
+            WriteLine("Network answers after training: ");
+
+            for (i = 0; i < numOfTests; i++)
+            {
+                output = neuralNetwork.ForwardPass(input[i]);
+                Write("For test {0}: ", i);
+
+                for (j = 0; j < output.Length; j++) Write("{0} ", output[j]);
+
+                WriteLine();
+            }
 
             ReadKey();
         }

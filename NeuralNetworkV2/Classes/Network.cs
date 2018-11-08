@@ -52,7 +52,10 @@ namespace NeuralNetworkV2
         public double[] ForwardPass(double[] inputs)
         {
             int i, j;
-            double[] outputVector = new double[inputs.Length];
+            double[] outputVector;
+
+            inputs = AddingOne(inputs);
+            outputVector = new double[inputs.Length];
 
             for (i = 0; i < NumberOfLayers; i++)
             {
@@ -77,8 +80,9 @@ namespace NeuralNetworkV2
         /// <returns></returns>
         public double TrainOnSingleExample(double[] example, double[] answer)
         {
-            WriteLine("I - {0}; Ex - {1}", NumberOfInputs, example.Length);
-            if (example.Length != NumberOfInputs) throw new Exception("Example vector has not the same length as number of inputs to network");
+            example = AddingOne(example);
+
+            if (example.Length != NumberOfInputs + 1) throw new Exception("Example vector has not the same length as number of inputs to network");
             if (answer.Length != NumberOfOutputs) throw new Exception("Answers vector has not the same length as number of outputs from network");
 
             //-------Forward pass with saved answers for each neuron-------//
@@ -96,13 +100,17 @@ namespace NeuralNetworkV2
                     outputs[i][j] = Neurons[i][j].ForwardPass(inputVector);
                 }
 
-                inputVector = AddingOne(outputs[i]);
+                outputs[i] = AddingOne(outputs[i]);
+
+                inputVector = outputs[i];
             }
 
             //-------Training-------//
 
-            double[][] delta = new double[NumberOfOutputs][];
+            double[][] delta = new double[NumberOfLayers][];
             int k;
+
+            //TODO: Correct delta
 
             for (i = NumberOfLayers - 1; i >= 0; i--)
             {
@@ -114,9 +122,11 @@ namespace NeuralNetworkV2
                      * delta = SigmaDerivative(summatory of current neuron) * 
                      *                                                          * ScalarProduct(Output weights of curr neuron, deltas of prev layer) for NOT output neurons
                      *                                                          or
-                     *                                                          * (T - O) for output neurons, T - target answer, O - real answer
+                     *                                                          * (T - O), where T - target answer, O - real answer, for output neurons
                      */
-                    delta[i][j] = outputs[i][j] * (1 - outputs[i][j]) * ((i == NumberOfLayers - 1) ? (answer[j] - outputs[i][j]) : ScalarProduct(GetOutputWeights(i, j), delta[i + 1])); 
+                    delta[i][j] = outputs[i][j] * (1 - outputs[i][j]) * ((i == NumberOfLayers - 1) ? (answer[j] - outputs[i][j]) : ScalarProduct(GetOutputWeights(i, j), delta[i + 1]));
+
+                    WriteLine("Layer {0}, Neuron {1}, delta = {2}; d = {3}, a-o = {4}", i, j, delta[i][j], outputs[i][j] * (1 - outputs[i][j]), (answer[j] - outputs[i][j]));
 
                     for (k = 0; k < Neurons[i][j].InputWeights.Length; k++)
                     {
@@ -127,8 +137,12 @@ namespace NeuralNetworkV2
 
             //-------Counting error-------//
 
+            //TODO: Clear this part
+
             double error = 0;
-            double[] newAnswer = ForwardPass(example);
+            var a = example.ToList();
+            a.RemoveAt(0);
+            double[] newAnswer = ForwardPass(a.ToArray());
 
             for (i = 0; i < newAnswer.Length; i++)
             {
@@ -157,7 +171,8 @@ namespace NeuralNetworkV2
             {
                 for (j = 0; j < inputMatrix.Length; j++)
                 {
-                    currError = TrainOnSingleExample(inputMatrix[i], rightAnswers[i]);
+                    WriteLine(" --- Example {0}, epoch {1}", j, i);
+                    currError = TrainOnSingleExample(inputMatrix[j], rightAnswers[j]);
                 }
 
                 if (Abs(currError - prevErr) < eps) return true;
@@ -179,7 +194,10 @@ namespace NeuralNetworkV2
             int i, j;
             List<double> output = new List<double>();
 
-            if (layer == (Neurons.Count - 1)) throw new Exception("Output layer has no output weights");
+            layer++; //Output weights are on the next layer
+            number++; //Because bias shifts all weights (and they do not fit numbering of neurons)
+
+            if (layer == (NumberOfLayers)) throw new Exception("Output layer has no output weights");
             
             for (i = 0; i < Neurons[layer].Count(); i++)
             {
