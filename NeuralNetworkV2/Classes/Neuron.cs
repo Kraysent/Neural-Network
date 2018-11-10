@@ -2,7 +2,6 @@
 using static System.Console;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace NeuralNetworkV2
 {
@@ -38,7 +37,7 @@ namespace NeuralNetworkV2
         }
 
         /// <summary>
-        /// One activation for current neuron
+        /// One activation for current neuron. Inputs must be WITHOUT included bias.
         /// </summary>
         /// <param name="inputs"></param>
         /// <returns></returns>
@@ -46,7 +45,9 @@ namespace NeuralNetworkV2
         {
             int i;
             double summ = 0;
-            
+
+            inputs = AddOne(inputs);
+
             if (inputs.Length != InputWeights.Length) throw new Exception("Length of input vector is not equal to length of weight vector.");
 
             for (i = 0; i < InputWeights.Length; i++)
@@ -55,6 +56,15 @@ namespace NeuralNetworkV2
             }
 
             return ActivationFunction(summ);
+        }
+
+        private double[] AddOne(double[] inputArray)
+        {
+            List<double> list = inputArray.ToList();
+
+            list.Insert(0, 1);
+
+            return list.ToArray();
         }
     }
 }

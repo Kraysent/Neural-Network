@@ -19,7 +19,7 @@ namespace NeuralNetworkV2
         /// Initialises empty neural network
         /// </summary>
         /// <param name="numberOfInputs"></param>
-        public Network(int numberOfInputs, double learningRate = 0.1)
+        public Network(int numberOfInputs, double learningRate = 1)
         {
             Neurons = new List<Neuron[]>();
             NumberOfInputs = numberOfInputs;
@@ -53,8 +53,7 @@ namespace NeuralNetworkV2
         {
             int i, j;
             double[] outputVector;
-
-            inputs = AddingOne(inputs);
+            
             outputVector = new double[inputs.Length];
 
             for (i = 0; i < NumberOfLayers; i++)
@@ -66,7 +65,7 @@ namespace NeuralNetworkV2
                     outputVector[j] = Neurons[i][j].ForwardPass(inputs);
                 }
 
-                inputs = AddingOne(outputVector);
+                inputs = outputVector;
             }
 
             return outputVector;
@@ -80,9 +79,7 @@ namespace NeuralNetworkV2
         /// <returns></returns>
         public double TrainOnSingleExample(double[] example, double[] answer)
         {
-            example = AddingOne(example);
-
-            if (example.Length != NumberOfInputs + 1) throw new Exception("Example vector has not the same length as number of inputs to network");
+            if (example.Length != NumberOfInputs) throw new Exception("Example vector has not the same length as number of inputs to network");
             if (answer.Length != NumberOfOutputs) throw new Exception("Answers vector has not the same length as number of outputs from network");
 
             //-------Forward pass with saved answers for each neuron-------//
@@ -90,7 +87,7 @@ namespace NeuralNetworkV2
             int i, j;
             double[] inputVector = example;
             List<double[]> outputs = new List<double[]>();
-
+            
             for (i = 0; i < NumberOfLayers; i++)
             {
                 outputs.Add(new double[Neurons[i].Length]);
@@ -99,9 +96,7 @@ namespace NeuralNetworkV2
                 {
                     outputs[i][j] = Neurons[i][j].ForwardPass(inputVector);
                 }
-
-                outputs[i] = AddingOne(outputs[i]);
-
+                
                 inputVector = outputs[i];
             }
 
@@ -109,9 +104,7 @@ namespace NeuralNetworkV2
 
             double[][] delta = new double[NumberOfLayers][];
             int k;
-
-            //TODO: Correct delta
-
+            
             for (i = NumberOfLayers - 1; i >= 0; i--)
             {
                 delta[i] = new double[Neurons[i].Length];
@@ -125,24 +118,20 @@ namespace NeuralNetworkV2
                      *                                                          * (T - O), where T - target answer, O - real answer, for output neurons
                      */
                     delta[i][j] = outputs[i][j] * (1 - outputs[i][j]) * ((i == NumberOfLayers - 1) ? (answer[j] - outputs[i][j]) : ScalarProduct(GetOutputWeights(i, j), delta[i + 1]));
-
-                    WriteLine("Layer {0}, Neuron {1}, delta = {2}; d = {3}, a-o = {4}", i, j, delta[i][j], outputs[i][j] * (1 - outputs[i][j]), (answer[j] - outputs[i][j]));
+                    
+                    //WriteLine("Layer {0}, Neuron {1}, Output: {2}", i, j, outputs[i][j]);
 
                     for (k = 0; k < Neurons[i][j].InputWeights.Length; k++)
                     {
-                        Neurons[i][j].InputWeights[k] = Neurons[i][j].InputWeights[k] + delta[i][j] * LearningRate * ((i == 0) ? example[k] : outputs[i - 1][k]);
+                        Neurons[i][j].InputWeights[k] = Neurons[i][j].InputWeights[k] + delta[i][j] * LearningRate * ((k == 0) ? 1 : ((i == 0) ? example[k - 1] : outputs[i - 1][k - 1])); //String includes bias
                     }
                 }
             }
 
             //-------Counting error-------//
-
-            //TODO: Clear this part
-
+            
             double error = 0;
-            var a = example.ToList();
-            a.RemoveAt(0);
-            double[] newAnswer = ForwardPass(a.ToArray());
+            double[] newAnswer = ForwardPass(example);
 
             for (i = 0; i < newAnswer.Length; i++)
             {
@@ -169,13 +158,28 @@ namespace NeuralNetworkV2
 
             for (i = 0; i < maxEpoches; i++)
             {
+                currError = 0;
+
                 for (j = 0; j < inputMatrix.Length; j++)
                 {
                     WriteLine(" --- Example {0}, epoch {1}", j, i);
-                    currError = TrainOnSingleExample(inputMatrix[j], rightAnswers[j]);
+                    currError += TrainOnSingleExample(inputMatrix[j], rightAnswers[j]);
+                    //WriteLine("Current error: {0}, previous error: {1}", currError, prevErr);
                 }
 
-                if (Abs(currError - prevErr) < eps) return true;
+                WriteLine("Network answers on epoch {0}: ", i);
+
+                for (j = 0; j < inputMatrix.Length; j++)
+                {
+                    double[] output = ForwardPass(inputMatrix[j]);
+                    Write("For test {0}: ", j);
+                    
+                    for (int k = 0; k < output.Length; k++) Write("{0} ", output[k]);
+
+                    WriteLine();
+                }
+
+                if (Abs(currError) < eps) return true;
 
                 prevErr = currError;
             }
@@ -212,16 +216,7 @@ namespace NeuralNetworkV2
 
             return output.ToArray();
         }
-
-        private static double[] AddingOne(double[] input)
-        {
-            List<double> arr = input.ToList();
-
-            arr.Insert(0, 1);
-
-            return arr.ToArray();
-        }
-
+        
         private static double ScalarProduct(double[] vector1, double[] vector2)
         {
             int i;
