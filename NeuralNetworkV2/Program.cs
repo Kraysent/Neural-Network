@@ -18,10 +18,10 @@ namespace NeuralNetworkV2
             //-----------------Creating network-----------------//
 
             int numberOfParameters = 2, i, j;
-            double learningRate = 0.1;
+            double learningRate = 0.4;
             Network neuralNetwork = new Network(numberOfParameters, learningRate);
 
-            neuralNetwork.AddLayer(2, Sigma, SigmaDerivative);
+            neuralNetwork.AddLayer(numberOfParameters, Sigma, SigmaDerivative);
             neuralNetwork.AddLayer(1, Sigma, SigmaDerivative);
 
             //-----------------Testing-----------------------//
@@ -89,15 +89,6 @@ namespace NeuralNetworkV2
             }
 
             ReadKey();
-        }
-        
-        private static double[] AddingOne(double[] input)
-        {
-            List<double> arr = input.ToList();
-
-            arr.Insert(0, 1);
-
-            return arr.ToArray();
         }
     }
 }

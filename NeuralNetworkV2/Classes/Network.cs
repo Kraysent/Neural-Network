@@ -19,7 +19,7 @@ namespace NeuralNetworkV2
         /// Initialises empty neural network
         /// </summary>
         /// <param name="numberOfInputs"></param>
-        public Network(int numberOfInputs, double learningRate = 1)
+        public Network(int numberOfInputs, double learningRate = 0.1)
         {
             Neurons = new List<Neuron[]>();
             NumberOfInputs = numberOfInputs;
@@ -59,7 +59,7 @@ namespace NeuralNetworkV2
             for (i = 0; i < NumberOfLayers; i++)
             {
                 outputVector = new double[Neurons[i].Length];
-
+                
                 for (j = 0; j < Neurons[i].Length; j++)
                 {
                     outputVector[j] = Neurons[i][j].ForwardPass(inputs);
@@ -118,12 +118,16 @@ namespace NeuralNetworkV2
                      *                                                          * (T - O), where T - target answer, O - real answer, for output neurons
                      */
                     delta[i][j] = outputs[i][j] * (1 - outputs[i][j]) * ((i == NumberOfLayers - 1) ? (answer[j] - outputs[i][j]) : ScalarProduct(GetOutputWeights(i, j), delta[i + 1]));
-                    
-                    //WriteLine("Layer {0}, Neuron {1}, Output: {2}", i, j, outputs[i][j]);
+                }
+            }
 
+            for (i = 0; i < NumberOfLayers; i++)
+            {
+                for (j = 0; j < Neurons[i].Length; j++)
+                {
                     for (k = 0; k < Neurons[i][j].InputWeights.Length; k++)
                     {
-                        Neurons[i][j].InputWeights[k] = Neurons[i][j].InputWeights[k] + delta[i][j] * LearningRate * ((k == 0) ? 1 : ((i == 0) ? example[k - 1] : outputs[i - 1][k - 1])); //String includes bias
+                        Neurons[i][j].InputWeights[k] += delta[i][j] * LearningRate * ((k == 0) ? 1 : ((i == 0) ? example[k - 1] : outputs[i - 1][k - 1]));
                     }
                 }
             }
@@ -149,7 +153,7 @@ namespace NeuralNetworkV2
         /// <param name="maxEpoches"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public bool TrainUntilConvergence(double[][] inputMatrix, double[][] rightAnswers, int maxEpoches = (int)1e3, double eps = 1e-3)
+        public bool TrainUntilConvergence(double[][] inputMatrix, double[][] rightAnswers, int maxEpoches = (int)1e6, double eps = 1e-4)
         {
             if (inputMatrix.Length != rightAnswers.Length) throw new Exception("Number of example tests is not equal to number of right answers tests");
 
@@ -162,12 +166,12 @@ namespace NeuralNetworkV2
 
                 for (j = 0; j < inputMatrix.Length; j++)
                 {
-                    WriteLine(" --- Example {0}, epoch {1}", j, i);
+                    //WriteLine(" --- Example {0}, epoch {1}", j, i);
                     currError += TrainOnSingleExample(inputMatrix[j], rightAnswers[j]);
                     //WriteLine("Current error: {0}, previous error: {1}", currError, prevErr);
                 }
 
-                WriteLine("Network answers on epoch {0}: ", i);
+                /*WriteLine("Network answers on epoch {0}: ", i);
 
                 for (j = 0; j < inputMatrix.Length; j++)
                 {
@@ -177,7 +181,7 @@ namespace NeuralNetworkV2
                     for (int k = 0; k < output.Length; k++) Write("{0} ", output[k]);
 
                     WriteLine();
-                }
+                }*/
 
                 if (Abs(currError) < eps) return true;
 

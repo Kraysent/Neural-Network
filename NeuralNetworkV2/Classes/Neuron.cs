@@ -28,7 +28,7 @@ namespace NeuralNetworkV2
 
             for (i = 1; i < numberOfInputs; i++)
             {
-                weights[i] = (double)rnd.Next(-100, 100) / 10;
+                weights[i] = (double)rnd.Next(0, 10) / 10;
             }
 
             InputWeights = weights;
