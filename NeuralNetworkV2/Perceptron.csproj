@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{180A953C-CDA7-4116-8F70-C5D2E5F236AB}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>NeuralNetworkV2</RootNamespace>
-    <AssemblyName>NeuralNetworkV2</AssemblyName>
+    <RootNamespace>Perceptron</RootNamespace>
+    <AssemblyName>Perceptron</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

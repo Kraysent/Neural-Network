@@ -4,7 +4,7 @@ using static System.Console;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NeuralNetworkV2
+namespace Perceptron
 {
     class Network
     {

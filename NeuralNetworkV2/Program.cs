@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NeuralNetworkV2
+namespace Perceptron
 {
     class Program
     {
@@ -19,10 +19,16 @@ namespace NeuralNetworkV2
 
             int numberOfParameters = 2, i, j;
             double learningRate = 0.4;
-            Network neuralNetwork = new Network(numberOfParameters, learningRate);
+            Network neuralNetwork;
 
+            Write("Enter number of inputs to the network: ");
+            numberOfParameters = int.Parse(ReadLine());
+            WriteLine("Creating network...");
+
+            neuralNetwork = new Network(numberOfParameters, learningRate);
             neuralNetwork.AddLayer(numberOfParameters, Sigma, SigmaDerivative);
             neuralNetwork.AddLayer(1, Sigma, SigmaDerivative);
+            WriteLine("Network created!");
 
             //-----------------Testing-----------------------//
 
@@ -31,10 +37,8 @@ namespace NeuralNetworkV2
             List<double[]> input = new List<double[]>();
             double[][] rightAnswers;
             bool networkResult;
-            
-            WriteLine("_____Forward pass test_____");
-            WriteLine();
 
+            WriteLine();
             Write("Enter number of tests: ");
             numOfTests = int.Parse(ReadLine());
             WriteLine();
@@ -60,8 +64,6 @@ namespace NeuralNetworkV2
             }
 
             WriteLine();
-            WriteLine("______Training test______");
-            WriteLine();
 
             WriteLine("Enter right answers: ");
             rightAnswers = new double[numOfTests][];
@@ -72,10 +74,11 @@ namespace NeuralNetworkV2
                 rightAnswers[i] = ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray();
             }
             
-            networkResult = neuralNetwork.TrainUntilConvergence(input.ToArray(), rightAnswers);
-
-            WriteLine("Result: {0}", networkResult);
-
+            WriteLine();
+            WriteLine("Training...");
+            networkResult = neuralNetwork.TrainUntilConvergence(input.ToArray(), rightAnswers, (int)1e6, 1e-4);
+            WriteLine("Network {0}", (networkResult == true) ? "trained!" : "was not converged!");
+            WriteLine();
             WriteLine("Network answers after training: ");
 
             for (i = 0; i < numOfTests; i++)
@@ -88,7 +91,22 @@ namespace NeuralNetworkV2
                 WriteLine();
             }
 
-            ReadKey();
+            WriteLine();
+            
+            while (true)
+            {
+                Write("Ask something: ");
+                output = neuralNetwork.ForwardPass(ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray());
+                Write("Network answer: ");
+
+                for (i = 0; i < output.Length; i++)
+                {
+                    Write("{0} ", output[i]);
+                }
+
+                WriteLine();
+                WriteLine();
+            }
         }
     }
 }
