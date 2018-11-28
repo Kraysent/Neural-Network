@@ -1,6 +1,6 @@
-D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\bin\Debug\NeuralNetworkV2.exe
-D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\bin\Debug\NeuralNetworkV2.pdb
 D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\obj\Debug\Perceptron.csprojAssemblyReference.cache
 D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\obj\Debug\Perceptron.csproj.CoreCompileInputs.cache
-D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\obj\Debug\NeuralNetworkV2.exe
-D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\obj\Debug\NeuralNetworkV2.pdb
+D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\bin\Debug\Perceptron.exe
+D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\bin\Debug\Perceptron.pdb
+D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\obj\Debug\Perceptron.exe
+D:\Coding\C#\NeuralNetworkV2\NeuralNetworkV2\obj\Debug\Perceptron.pdb

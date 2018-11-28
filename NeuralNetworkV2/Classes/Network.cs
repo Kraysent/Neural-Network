@@ -1,13 +1,18 @@
 ﻿using System;
+using static System.IO.File;
 using static System.Math;
 using static System.Console;
 using System.Collections.Generic;
 using System.Linq;
 
+// Works only with sigma activation yet
+
 namespace Perceptron
 {
     class Network
     {
+        public const char SEPARATOR = ';';
+
         public int NumberOfInputs;
         public List<Neuron[]> Neurons;
         public double LearningRate;
@@ -15,6 +20,9 @@ namespace Perceptron
         public int NumberOfLayers { get => Neurons.Count; }
         public int NumberOfOutputs { get => Neurons[NumberOfLayers - 1].Length; }
 
+        public static double Sigma(double x) => 1 / (1 + Exp(-x));
+        public static double SigmaDerivative(double x) => Sigma(x) * (1 - Sigma(x));
+        
         /// <summary>
         /// Initialises empty neural network
         /// </summary>
@@ -32,7 +40,7 @@ namespace Perceptron
         /// <param name="numberOfNeurons"></param>
         /// <param name="activation"></param>
         /// <param name="activationDerivative"></param>
-        public void AddLayer(int numberOfNeurons, Function activation, Function activationDerivative)
+        public void AddLayer(int numberOfNeurons)
         {
             int i, currLayer = Neurons.Count;
 
@@ -40,7 +48,7 @@ namespace Perceptron
             
             for (i = 0; i < numberOfNeurons; i++)
             {
-                Neurons[currLayer][i] = new Neuron(activation, activationDerivative, NumberOfInputs);
+                Neurons[currLayer][i] = new Neuron(Sigma, SigmaDerivative, (NumberOfLayers == 1) ? NumberOfInputs : Neurons[currLayer - 1].Length);
             }
         }
 
@@ -125,9 +133,9 @@ namespace Perceptron
             {
                 for (j = 0; j < Neurons[i].Length; j++)
                 {
-                    for (k = 0; k < Neurons[i][j].InputWeights.Length; k++)
+                    for (k = 0; k < Neurons[i][j].Weights.Length; k++)
                     {
-                        Neurons[i][j].InputWeights[k] += delta[i][j] * LearningRate * ((k == 0) ? 1 : ((i == 0) ? example[k - 1] : outputs[i - 1][k - 1]));
+                        Neurons[i][j].Weights[k] += delta[i][j] * LearningRate * ((k == 0) ? 1 : ((i == 0) ? example[k - 1] : outputs[i - 1][k - 1]));
                     }
                 }
             }
@@ -209,11 +217,11 @@ namespace Perceptron
             
             for (i = 0; i < Neurons[layer].Count(); i++)
             {
-                for (j = 0; j < Neurons[layer][i].InputWeights.Length; j++)
+                for (j = 0; j < Neurons[layer][i].Weights.Length; j++)
                 {
                     if (j == number)
                     {
-                        output.Add(Neurons[layer][i].InputWeights[j]);
+                        output.Add(Neurons[layer][i].Weights[j]);
                     }
                 }
             }
@@ -221,6 +229,81 @@ namespace Perceptron
             return output.ToArray();
         }
         
+        /// <summary>
+        /// Uploads network to file
+        /// </summary>
+        /// <param name="outputDirectory"></param>
+        public void Upload(string outputFileName)
+        {
+            List<string> outputList = new List<string>();
+            string currString;
+            int i, j, k;
+            
+            currString = "";
+
+            for (i = 0; i < NumberOfLayers; i++)
+            {
+                currString += Neurons[i].Length + ((i != NumberOfLayers - 1) ? SEPARATOR.ToString() : "");
+            }
+
+            outputList.Add(currString);
+
+            for (i = 0; i < NumberOfLayers; i++)
+            {
+                for (j = 0; j < Neurons[i].Length; j++)
+                {
+                    currString = "";
+
+                    for (k = 0; k < Neurons[i][j].Weights.Length; k++)
+                    {
+                        currString += Neurons[i][j].Weights[k] + ((k != Neurons[i][j].Weights.Length - 1) ? SEPARATOR.ToString() : "");
+                    }
+
+                    outputList.Add(currString);
+                }
+            }
+
+            WriteAllLines(outputFileName, outputList);
+        }
+
+        /// <summary>
+        /// Downloads network from file
+        /// </summary>
+        /// <param name="fileName"></param>
+        public void Download(string fileName)
+        {
+            try
+            {
+                double[][] contents = ReadAllLines(fileName).Select(x => x.Split(SEPARATOR).Select(y => double.Parse(y)).ToArray()).ToArray();
+                int i, j, k = 0;
+
+                Clear();
+
+                for (i = 0; i < contents[0].Length; i++)
+                {
+                    AddLayer((int)contents[0][i]);
+                }
+
+                for (i = 0; i < contents[0].Length; i++)
+                {
+                    for (j = 0; j < contents[0][i]; j++)
+                    {
+                        k++;
+                        Neurons[i][j].Weights = contents[k];
+                    }
+                }
+            }
+            catch { throw new Exception("File has wrong format"); }
+        }
+
+        /// <summary>
+        /// Clears current network
+        /// </summary>
+        public void Clear()
+        {
+            Neurons.Clear();
+        }
+
         private static double ScalarProduct(double[] vector1, double[] vector2)
         {
             int i;

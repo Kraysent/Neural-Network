@@ -11,27 +11,28 @@ namespace Perceptron
     {
         public Function ActivationFunction;
         public Function ActivationDerivative;
-        public double[] InputWeights;
+        public double[] Weights;
+
+        static Random rnd = new Random();
 
         /// <summary>
         /// Initialising neuron with specific type
         /// </summary>
         /// <param name="nType"></param>
         /// <param name="numberOfInputs"></param>
-        public Neuron(Function activationFunction, Function activationDerivative, int numberOfInputs)
+        public Neuron(Function activationFunction, Function activationDerivative, int numberOfInputs, double maxWeight = 1)
         {
             int i;
             double[] weights = new double[++numberOfInputs];
-            Random rnd = new Random();
-
+            
             weights[0] = 1; //Bias
 
             for (i = 1; i < numberOfInputs; i++)
             {
-                weights[i] = (double)rnd.Next(0, 10) / 10;
+                weights[i] = rnd.NextDouble() * maxWeight;
             }
 
-            InputWeights = weights;
+            Weights = weights;
             ActivationFunction = activationFunction;
             ActivationDerivative = activationDerivative;
         }
@@ -48,16 +49,21 @@ namespace Perceptron
 
             inputs = AddOne(inputs);
 
-            if (inputs.Length != InputWeights.Length) throw new Exception("Length of input vector is not equal to length of weight vector.");
+            if (inputs.Length != Weights.Length) throw new Exception("Length of input vector is not equal to length of weight vector.");
 
-            for (i = 0; i < InputWeights.Length; i++)
+            for (i = 0; i < Weights.Length; i++)
             {
-                summ += InputWeights[i] * inputs[i];
+                summ += Weights[i] * inputs[i];
             }
 
             return ActivationFunction(summ);
         }
 
+        /// <summary>
+        /// Inserts extra space into 1-st element array
+        /// </summary>
+        /// <param name="inputArray"></param>
+        /// <returns></returns>
         private double[] AddOne(double[] inputArray)
         {
             List<double> list = inputArray.ToList();

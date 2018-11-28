@@ -1,9 +1,8 @@
 ﻿using static System.Console;
 using static System.Math;
-using System;
+using static System.IO.Directory;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Perceptron
 {
@@ -12,27 +11,37 @@ namespace Perceptron
         static double Sigma(double x) => 1 / (1 + Exp(-x));
         static double SigmaDerivative(double x) => Sigma(x) * (1 - Sigma(x));
         static double Pass(double x) => x;
-        
+
+        static Network neuralNetwork;
+        static int numberOfParameters = 2;
+
         static void Main(string[] args)
         {
             //-----------------Creating network-----------------//
-
-            int numberOfParameters = 2, i, j;
+    
             double learningRate = 0.4;
-            Network neuralNetwork;
 
             Write("Enter number of inputs to the network: ");
             numberOfParameters = int.Parse(ReadLine());
             WriteLine("Creating network...");
 
             neuralNetwork = new Network(numberOfParameters, learningRate);
-            neuralNetwork.AddLayer(numberOfParameters, Sigma, SigmaDerivative);
-            neuralNetwork.AddLayer(1, Sigma, SigmaDerivative);
+            neuralNetwork.AddLayer(numberOfParameters);
+            neuralNetwork.AddLayer(numberOfParameters*2);
+            neuralNetwork.AddLayer(1);
             WriteLine("Network created!");
 
+            TestingDownload();
+
+            WriteLine("Network downloaded!");
+            ReadKey();
+        }
+
+        public static void TestingNetwork()
+        {
             //-----------------Testing-----------------------//
 
-            int numOfTests;
+            int numOfTests, i, j;
             double[] output;
             List<double[]> input = new List<double[]>();
             double[][] rightAnswers;
@@ -60,7 +69,7 @@ namespace Perceptron
 
                 for (j = 0; j < output.Length; j++) Write("{0} ", output[j]);
 
-                WriteLine(); 
+                WriteLine();
             }
 
             WriteLine();
@@ -73,7 +82,7 @@ namespace Perceptron
                 Write("For test {0}: ", i);
                 rightAnswers[i] = ReadLine().Split(' ').Select(x => double.Parse(x)).ToArray();
             }
-            
+
             WriteLine();
             WriteLine("Training...");
             networkResult = neuralNetwork.TrainUntilConvergence(input.ToArray(), rightAnswers, (int)1e6, 1e-4);
@@ -92,7 +101,7 @@ namespace Perceptron
             }
 
             WriteLine();
-            
+
             while (true)
             {
                 Write("Ask something: ");
@@ -107,6 +116,17 @@ namespace Perceptron
                 WriteLine();
                 WriteLine();
             }
+        }
+
+        public static void TestingUpload()
+        {
+            neuralNetwork.Upload(GetCurrentDirectory() + "\\NN.txt");
+        }
+
+        public static void TestingDownload()
+        {
+            neuralNetwork.Download(GetCurrentDirectory() + "\\NN.txt");
+            neuralNetwork.Upload(GetCurrentDirectory() + "\\NN_U.txt");
         }
     }
 }
